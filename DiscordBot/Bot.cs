@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace DiscordBot
@@ -11,12 +12,16 @@ namespace DiscordBot
     {
         private ServiceProvider? _serviceProvider;
 
+        private readonly ILogger<Bot> _logger;
         private readonly IConfiguration _configuration;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
 
-        public Bot(IConfiguration configuration)    
+        public Bot(
+            ILogger<Bot> logger,
+            IConfiguration configuration)    
         {
+            _logger = logger;
             _configuration = configuration;
 
             DiscordSocketConfig config = new()
@@ -44,6 +49,8 @@ namespace DiscordBot
 
         public async Task StopAsync()
         {
+            _logger.LogInformation("Shutting down");
+
             if(_client != null)
             {
                 await _client.LogoutAsync();
@@ -52,10 +59,13 @@ namespace DiscordBot
         }
         
         private async Task HandleCommandAsync(SocketMessage messageParam)
-        {
+        { 
             //Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
+
+            //Log the received message
+            _logger.LogInformation($"{DateTime.Now.ToShortTimeString()} - {message.Author}: {message.Content}");
 
             int position = 0;
 

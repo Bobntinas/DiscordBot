@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace DiscordBot
@@ -16,6 +17,11 @@ namespace DiscordBot
                 .Build();
 
             var serviceProvider = new ServiceCollection()
+                .AddLogging(options =>
+                {
+                    options.ClearProviders();
+                    options.AddConsole();
+                })
                 .AddSingleton<IConfiguration>(configuration)
                 .AddScoped<IBot, Bot>()
                 .BuildServiceProvider();
@@ -26,16 +32,12 @@ namespace DiscordBot
 
                 await bot.StartAsync(serviceProvider);
 
-                Console.WriteLine("Connected to Discord");
-
                 do
                 {
                     var keyInfo = Console.ReadKey();
 
                     if (keyInfo.Key == ConsoleKey.Q)
                     {
-                        Console.WriteLine("\nShutting Down");
-
                         await bot.StopAsync();
                         return;
                     }
