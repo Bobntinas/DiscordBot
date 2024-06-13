@@ -59,7 +59,7 @@ namespace DiscordBot
         }
         
         private async Task HandleCommandAsync(SocketMessage messageParam)
-        { 
+        {
             //Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
